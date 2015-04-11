@@ -1,0 +1,31 @@
+{
+    "name": "angular-freebox-authentication",
+    "version": "1.0.0",
+    "description": "AngularJS authentication module to deal with Freebox OS API",
+    "homepage": "https://github.com/xelita/angular-freebox-authentication",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/xelita/angular-freebox-authentication.git"
+    },
+    "bugs": {
+        "url": "https://github.com/xelita/angular-freebox-authentication/issues"
+    },
+    "keywords": [
+        "angular",
+        "freebox os",
+        "authentication"
+    ],
+    "author": "xelita <admin@xelita.com>",
+    "license": "MIT",
+    "main": "src/freeboxAuthenticationModule.js",
+    "devDependencies": {
+        "karma": "~0.12.14",
+        "karma-jasmine": "~0.1.5",
+        "karma-phantomjs-launcher": "~0.1.4",
+        "bower": "~1.3.3"
+    },
+    "scripts": {
+        "postinstall": "bower install",
+        "test": "karma start test/karma.conf.js"
+    }
+}

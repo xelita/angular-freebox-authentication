@@ -1,0 +1,33 @@
+{
+    "name": "angular-freebox-authentication",
+    "version": "1.0.0",
+    "homepage": "https://github.com/xelita/angular-freebox-authentication",
+    "authors": [
+        "xelita <admin@xelita.com>"
+    ],
+    "description": "AngularJS authentication module to deal with Freebox OS API",
+    "main": "src/freeboxAuthenticationModule.js",
+    "keywords": [
+        "angular",
+        "freebox os",
+        "authentication"
+    ],
+    "license": "MIT",
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "test",
+        "tests"
+    ],
+    "devDependencies": {
+        "angular": "~1.2.3",
+        "angular-mocks": "~1.2.3"
+    },
+    "dependencies": {
+        "angular": "~1.2.3",
+        "angular-freebox-common": "~1.0.0"
+    }
+}
+
+     
