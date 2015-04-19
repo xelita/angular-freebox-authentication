@@ -16,9 +16,12 @@ module.exports = function (config) {
         files: [
             'bower_components/angular/angular.js',
             'bower_components/angular-mocks/angular-mocks.js',
+            'bower_components/angular-base64-codec/src/angularBase64.js',
+            'bower_components/angular-basic-auth/dist/angular-basic-auth.js',
+            'bower_components/angular-freebox-common/src/freeboxCommonModule.js',
 
-            'src/freeboxAuthenticationModule.js',
-            'test/freeboxAuthenticationModuleSpec.js',
+            'src/freeboxAuthModule.js',
+            'test/freeboxAuthModuleSpec.js',
         ],
 
 
