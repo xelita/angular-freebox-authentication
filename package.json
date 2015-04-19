@@ -1,7 +1,7 @@
 {
-    "name": "angular-freebox-authentication",
+    "name": "angular-freebox-auth",
     "version": "1.0.0",
-    "description": "AngularJS authentication module to deal with Freebox OS API",
+    "description": "AngularJS authentication module for Freebox OS",
     "homepage": "https://github.com/xelita/angular-freebox-authentication",
     "repository": {
         "type": "git",
@@ -17,7 +17,7 @@
     ],
     "author": "xelita <admin@xelita.com>",
     "license": "MIT",
-    "main": "src/freeboxAuthenticationModule.js",
+    "main": "src/angular-freebox-auth.js",
     "devDependencies": {
         "karma": "~0.12.14",
         "karma-jasmine": "~0.1.5",
