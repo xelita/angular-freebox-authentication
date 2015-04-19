@@ -1,15 +1,17 @@
 /**
- * Angular Module relying on Freebox OS API.
+ * AngularJS authentication module for Freebox OS.
  * http://dev.freebox.fr/sdk/os/
+ *
+ * @author xelita (https://github.com/xelita)
  */
-var freeboxAuthenticationModule = angular.module('freeboxAuthenticationModule', ['fbCommonModule']);
+var fbAuthModule = angular.module('fbAuthModule', ['fbCommonModule', 'basicAuthModule']);
 
 // Constants
 
 /**
  * Constants service used in the whole module.
  */
-freeboxAuthenticationModule.constant('freeboxAuthenticationConstants', {
+fbAuthModule.constant('fbAuthConstants', {
     urls: {
         authorize: '/login/authorize',
         login: '/login/login',
@@ -24,7 +26,7 @@ freeboxAuthenticationModule.constant('freeboxAuthenticationConstants', {
         denied: 'denied'
     },
     tracking: {
-        waitingTimeMillis: 2000
+        waitingTimeMillis: 5000
     }
 });
 
@@ -33,25 +35,26 @@ freeboxAuthenticationModule.constant('freeboxAuthenticationConstants', {
 /**
  * Main service of the module.
  */
-freeboxAuthenticationModule.factory('freeboxAuthenticationService', ['$log', '$http', '$q', 'freeboxAuthenticationConstants', 'fbCommonService', 'fbCommonConstants', function ($log, $http, $q, freeboxAuthenticationConstants, fbCommonService, fbCommonConstants) {
+fbAuthModule.factory('fbAuthService', ['$log', '$http', '$q', 'fbAuthConstants', 'fbCommonService', 'fbCommonConstants', function ($log, $http, $q, fbAuthConstants, fbCommonService, fbCommonConstants) {
 
     return {
 
         /**
          * Request an authentication token to the FB.
+         * This operation can only be performed on the local network.
          * @see http://dev.freebox.fr/sdk/os/login/#request-authorization
          *
          * @param tokenRequest some information needed by the FB to generate the authentication token
          * @return HttpPromise
          */
         requestAuthorization: function (tokenRequest) {
-            $log.debug('freeboxAuthenticationService.requestAuthorization.');
+            $log.debug('fbAuthService.requestAuthorization.');
 
             // Deferred result
             var deferred = $q.defer();
 
             // Request url (user must be connected to the local network)
-            fbCommonService.apiRequestUrl(freeboxAuthenticationConstants.urls.authorize).then(function (requestUrl) {
+            fbCommonService.apiRequestUrl(fbAuthConstants.urls.authorize).then(function (requestUrl) {
 
                 // Calling FB
                 $http({method: 'POST', url: requestUrl, data: tokenRequest}).then(function (response) {
@@ -65,19 +68,20 @@ freeboxAuthenticationModule.factory('freeboxAuthenticationService', ['$log', '$h
 
         /**
          * Track the authorization progress of an application token.
+         * This operation can only be performed on the local network.
          * @see http://dev.freebox.fr/sdk/os/login/#track-authorization-progress
          *
          * @param trackingId the identifier used to track the authorization progress
          * @return HttpPromise
          */
         trackAuthorizationProgress: function (trackingId) {
-            $log.debug('freeboxAuthenticationService.trackAuthorizationProgress.');
+            $log.debug('fbAuthService.trackAuthorizationProgress.');
 
             // Deferred result
             var deferred = $q.defer();
 
             // Request url (user must be connected to the local network)
-            fbCommonService.apiRequestUrl(freeboxAuthenticationConstants.urls.authorize + '/' + trackingId).then(function (requestUrl) {
+            fbCommonService.apiRequestUrl(fbAuthConstants.urls.authorize + '/' + trackingId).then(function (requestUrl) {
 
                 // Calling FB
                 $http({method: 'GET', url: requestUrl}).then(function (response) {
@@ -91,6 +95,7 @@ freeboxAuthenticationModule.factory('freeboxAuthenticationService', ['$log', '$h
 
         /**
          * Poll the authorization progress until a decision is made upon the application token.
+         * This operation can only be performed on the local network.
          * @see http://dev.freebox.fr/sdk/os/login/#track-authorization-progress
          *
          * @param trackingId the tracker identifier
@@ -98,7 +103,7 @@ freeboxAuthenticationModule.factory('freeboxAuthenticationService', ['$log', '$h
          * @return HttpPromise
          */
         trackAuthorizationProgressUntil: function (trackingId, appToken) {
-            $log.debug('freeboxAuthenticationService.trackAuthorizationProgressUntil.');
+            $log.debug('fbAuthService.trackAuthorizationProgressUntil.');
 
             // Pointer to this object
             var _this = this;
@@ -109,7 +114,7 @@ freeboxAuthenticationModule.factory('freeboxAuthenticationService', ['$log', '$h
             // Polling function
             var pollingFunction = function (deferred) {
                 // Polling waiting time
-                var waitingTimeMs = freeboxAuthenticationConstants.tracking.waitingTimeMillis || 5000;
+                var waitingTimeMs = fbAuthConstants.tracking.waitingTimeMillis || 5000;
 
                 // Start tracking
                 _this.trackAuthorizationProgress(trackingId).then(function (response) {
@@ -148,69 +153,91 @@ freeboxAuthenticationModule.factory('freeboxAuthenticationService', ['$log', '$h
         },
 
         /**
-         * http://dev.freebox.fr/sdk/os/login/#getting-the-challenge-value
-         * eg. GET http://mafreebox.freebox.fr/api/v3/login
-         *     GET http://[url]/api/v3/login
+         * Ask for a login on the given box url: remote or local (http://mafreebox.freebox.fr)
+         * @see http://dev.freebox.fr/sdk/os/login/#getting-the-challenge-value
+         *
+         * @param url the remote box url (optional)
+         * @return HttpPromise
          */
         login: function (url) {
-            $log.debug('freeboxAuthenticationService.login.');
+            $log.debug('fbAuthService.login.');
+
+            // Deferred result
+            var deferred = $q.defer();
 
             // Request url
-            var requestUrl = fbCommonService.apiRequestUrl(freeboxAuthenticationConstants.urls.login, url);
-            $log.debug('requestUrl is: ' + requestUrl);
+            fbCommonService.apiRequestUrl(fbAuthConstants.urls.login, url).then(function (requestUrl) {
 
-            // Return promise
-            return $http.get(requestUrl);
+                // Calling FB
+                $http({method: 'GET', url: requestUrl}).then(function (response) {
+                    deferred.resolve(response);
+                });
+            });
+
+            // Returning promise
+            return deferred.promise;
         },
 
         /**
-         * http://dev.freebox.fr/sdk/os/login/#obtaining-a-session-token
-         * eg. POST http://mafreebox.freebox.fr/api/v3/login/session
-         *     POST http://[url]/api/v3/login/session
+         * Ask for a session token on the given box url: remote or local (http://mafreebox.freebox.fr)
+         * @see http://dev.freebox.fr/sdk/os/login/#obtaining-a-session-token
+         *
+         * @param url the remote box url (optional)
+         * @param appId the application identifier
+         * @param password the password
+         * @return HttpPromise
          */
         session: function (url, appId, password) {
-            $log.debug('freeboxAuthenticationService.session.');
+            $log.debug('fbAuthService.session.');
+
+            // Deferred result
+            var deferred = $q.defer();
 
             // Request url
-            var requestUrl = fbCommonService.apiRequestUrl(freeboxAuthenticationConstants.urls.session, url);
+            var requestUrl = fbCommonService.apiRequestUrl(fbAuthConstants.urls.session, url);
             $log.debug('requestUrl is: ' + requestUrl);
 
-            // Return promise
-            return $http.post(requestUrl, {app_id: appId, password: password});
-        },
+            // Request url
+            fbCommonService.apiRequestUrl(fbAuthConstants.urls.session).then(function (requestUrl) {
 
+                // Calling FB
+                $http({
+                    method: 'POST',
+                    url: requestUrl,
+                    data: {app_id: appId, password: password}
+                }).then(function (response) {
+                    deferred.resolve(response);
+                });
+            });
+
+            // Returning promise
+            return deferred.promise;
+        },
+        
         /**
-         * http://dev.freebox.fr/sdk/os/login/#closing-the-current-session
-         * eg. POST http://mafreebox.freebox.fr/api/v3/login/logout
-         *     POST http://[url]/api/v3/login/logout
+         * Ask for a logout on the given box url: remote or local (http://mafreebox.freebox.fr)
+         * @see http://dev.freebox.fr/sdk/os/login/#closing-the-current-session
+         *
+         * @param url the remote box url (optional)
+         * @return HttpPromise
          */
         logout: function (url) {
-            $log.debug('freeboxAuthenticationService.logout.');
+            $log.debug('fbAuthService.logout.');
+
+            // Deferred result
+            var deferred = $q.defer();
 
             // Request url
-            var requestUrl = fbCommonService.apiRequestUrl(freeboxAuthenticationConstants.urls.logout, url);
-            $log.debug('requestUrl is: ' + requestUrl);
+            fbCommonService.apiRequestUrl(fbAuthConstants.urls.logout, url).then(function (requestUrl) {
 
-            // Return promise
-            return $http.post(requestUrl);
-        },
+                // Calling FB
+                $http({method: 'POST', url: requestUrl}).then(function (response) {
+                    deferred.resolve(response);
+                });
+            });
 
-        // CALL
-
-        /**
-         * http://dev.freebox.fr/sdk/os/login/#make-an-authenticated-call-to-the-api
-         * eg. GET http://mafreebox.freebox.fr/api/v3/login/logout
-         *     GET http://[url]/api/v3/[apiUrl]
-         */
-        callAPI: function (url, apiUrl, sessionToken) {
-            $log.debug('freeboxAuthenticationService.callAPI.');
-
-            // Request url
-            var requestUrl = fbCommonService.apiRequestUrl(apiUrl, url);
-            $log.debug('requestUrl is: ' + requestUrl);
-
-            // Return promise
-            return $http.get(requestUrl, {headers: {'X-Fbx-App-Auth': sessionToken}});
+            // Returning promise
+            return deferred.promise;
         }
     };
 }]);
