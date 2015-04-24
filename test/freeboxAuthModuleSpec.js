@@ -77,5 +77,26 @@ describe("fbAuthModule Tests Suite", function () {
             });
             $httpBackend.flush();
         });
+
+        it("trackAuthorizationProgress", function () {
+            var expectedApiVersion = {
+                "uid": "23b86ec8091013d668829fe12791fdab",
+                "device_name": "Freebox Server",
+                "api_version": "3.0",
+                "api_base_url": "/api/",
+                "device_type": "FreeboxServer1,1"
+            };
+            var expectedApiCallResponse = {
+                "status": "pending"
+            };
+
+            $httpBackend.expectGET('http://mafreebox.freebox.fr/api_version').respond(expectedApiVersion);
+            $httpBackend.expectGET('http://mafreebox.freebox.fr/api/v3/login/authorize/10').respond(expectedApiCallResponse);
+            var promise = fbAuthService.trackAuthorizationProgress(10);
+            promise.then(function (response) {
+                expect(response.data.status).toBe(expectedApiCallResponse.status);
+            });
+            $httpBackend.flush();
+        });
     });
 });
