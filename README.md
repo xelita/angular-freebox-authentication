@@ -1,13 +1,15 @@
-bo [angular-freebox-authentication][![Build Status](https://travis-ci.org/xelita/angular-freebox-authentication.png?branch=master)](https://travis-ci.org/xelita/angular-freebox-authentication)
 
-AngularJS authentication module to use Freebox OS API (http://dev.freebox.fr/sdk/os/).
+AngularJS authentication module for Freebox OS (http://dev.freebox.fr/sdk/os/).
 
 ## Quick start
 
-+ Include freeboxAuthenticationModule.js in your application.
++ Include freeboxAuthModule.js in your application (with it dependencies).
 
 ```html
-<script src="js/freeboxAuthenticationModule.js"></script>
+<script src="js/hmac-sha1.js"></script>
+<script src="js/enc-base64-min.js"></script>
+<script src="js/freeboxCommonModule.js"></script>
+<script src="js/freeboxAuthModule.js"></script>
 ```
 
 or use the minified version:
@@ -22,11 +24,11 @@ or use the minified version:
 var myapp = angular.module('myapp', ['freeboxAuthenticationModule']);
 ```
 
-+ Use the fbAuthenticationService as controller dependency and call fbAuthenticationService API:
++ Use the fbAuthService as controller dependency and call fbAuthService API:
 
 ```javascript
 $scope.sampleApiRequestUrl = function() {
-    fbAuthenticationService.apiRequestUrl('/login').then(function (url) {
+    fbAuthService.apiRequestUrl('/login').then(function (url) {
         $log.debug('API url is: ' + url);
     });
 };
