@@ -15,13 +15,13 @@ AngularJS authentication module for Freebox OS (http://dev.freebox.fr/sdk/os/).
 or use the minified version:
 
 ```html
-<script src="js/freeboxAuthenticationModule.min.js"></script>
+<script src="js/freeboxAuthModule.min.js"></script>
 ```
 
-+ Add the module `freeboxAuthenticationModule` as a dependency to your app module:
++ Add the module `fbAuthModule` as a dependency to your app module:
 
 ```javascript
-var myapp = angular.module('myapp', ['freeboxAuthenticationModule']);
+var myapp = angular.module('myapp', ['fbAuthModule']);
 ```
 
 + Use the fbAuthService as controller dependency and call fbAuthService API:
