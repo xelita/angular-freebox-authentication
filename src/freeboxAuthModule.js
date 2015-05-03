@@ -4,7 +4,7 @@
  *
  * @author xelita (https://github.com/xelita)
  */
-var fbAuthModule = angular.module('fbAuthModule', ['fbCommonModule', 'basicAuthModule']);
+var fbAuthModule = angular.module('fbAuthModule', ['fbCommonModule']);
 
 // Constants
 
@@ -14,7 +14,7 @@ var fbAuthModule = angular.module('fbAuthModule', ['fbCommonModule', 'basicAuthM
 fbAuthModule.constant('fbAuthConstants', {
     urls: {
         authorize: '/login/authorize',
-        login: '/login/login',
+        login: '/login',
         session: '/login/session',
         logout: '/login/logout'
     },
@@ -35,7 +35,7 @@ fbAuthModule.constant('fbAuthConstants', {
 /**
  * Main service of the module.
  */
-fbAuthModule.factory('fbAuthService', ['$log', '$http', '$q', 'fbAuthConstants', 'fbCommonService', 'fbCommonConstants', function ($log, $http, $q, fbAuthConstants, fbCommonService, fbCommonConstants) {
+fbAuthModule.factory('fbAuthService', ['$log', '$http', '$q', 'fbAuthConstants', 'fbCommonService', function ($log, $http, $q, fbAuthConstants, fbCommonService) {
 
     return {
 
@@ -182,23 +182,24 @@ fbAuthModule.factory('fbAuthService', ['$log', '$http', '$q', 'fbAuthConstants',
          * Ask for a session token on the given box url: remote or local (http://mafreebox.freebox.fr)
          * @see http://dev.freebox.fr/sdk/os/login/#obtaining-a-session-token
          *
-         * @param url the remote box url (optional)
          * @param appId the application identifier
-         * @param password the password
+         * @param appToken the application token
+         * @param challenge the authentication challenge
+         * @param url the remote box url (optional)
          * @return HttpPromise
          */
-        session: function (url, appId, password) {
+        session: function (appId, appToken, challenge, url) {
             $log.debug('fbAuthService.session.');
 
             // Deferred result
             var deferred = $q.defer();
 
-            // Request url
-            var requestUrl = fbCommonService.apiRequestUrl(fbAuthConstants.urls.session, url);
-            $log.debug('requestUrl is: ' + requestUrl);
+            // Compute encrypted password (HMAC + SHA1)
+            var password = CryptoJS.HmacSHA1(challenge, appToken).toString();
+            console.log(password);
 
             // Request url
-            fbCommonService.apiRequestUrl(fbAuthConstants.urls.session).then(function (requestUrl) {
+            fbCommonService.apiRequestUrl(fbAuthConstants.urls.session, url).then(function (requestUrl) {
 
                 // Calling FB
                 $http({
@@ -213,7 +214,7 @@ fbAuthModule.factory('fbAuthService', ['$log', '$http', '$q', 'fbAuthConstants',
             // Returning promise
             return deferred.promise;
         },
-        
+
         /**
          * Ask for a logout on the given box url: remote or local (http://mafreebox.freebox.fr)
          * @see http://dev.freebox.fr/sdk/os/login/#closing-the-current-session

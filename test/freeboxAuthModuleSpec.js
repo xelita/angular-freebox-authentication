@@ -15,7 +15,7 @@ describe("fbAuthModule Tests Suite", function () {
 
         it("urls", function () {
             expect(fbAuthConstants.urls.authorize).toBe('/login/authorize');
-            expect(fbAuthConstants.urls.login).toBe('/login/login');
+            expect(fbAuthConstants.urls.login).toBe('/login');
             expect(fbAuthConstants.urls.session).toBe('/login/session');
             expect(fbAuthConstants.urls.logout).toBe('/login/logout');
         });
@@ -95,6 +95,24 @@ describe("fbAuthModule Tests Suite", function () {
             var promise = fbAuthService.trackAuthorizationProgress(10);
             promise.then(function (response) {
                 expect(response.data.status).toBe(expectedApiCallResponse.status);
+            });
+            $httpBackend.flush();
+        });
+
+        it("logout", function () {
+            var expectedApiVersion = {
+                "uid": "23b86ec8091013d668829fe12791fdab",
+                "device_name": "Freebox Server",
+                "api_version": "3.0",
+                "api_base_url": "/api/",
+                "device_type": "FreeboxServer1,1"
+            };
+
+            $httpBackend.expectGET('http://mafreebox.freebox.fr/api_version').respond(expectedApiVersion);
+            $httpBackend.expectPOST('http://mafreebox.freebox.fr/api/v3/login/logout').respond({});
+            var promise = fbAuthService.logout();
+            promise.then(function (response) {
+                // Nothing expected there!
             });
             $httpBackend.flush();
         });
